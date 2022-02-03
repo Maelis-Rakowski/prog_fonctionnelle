@@ -11,11 +11,11 @@ object TP2Ex1:
   def valueInTable(t: Table, s: String): Int = t(s)
 
   /* Définissez la table vide (qui associe zéro à chaque mot) */
-  def emptyTable: Table = ???
+  def emptyTable: Table = (mot : String) => 0;
 
   /* Définissez une fonction pour créer une nouvelle table, qui associe la valeur n à la chaîne s, et qui est similaire
    * à t pour toutes les autres chaînes. */
-  def updateTable(t: Table, s: String, n: Int): Table = ???
+  def updateTable(t: Table, s: String, n: Int): Table = (mot : String) => if(mot == s) then n else t(s) ;
 
 
 object TP2Ex2:
@@ -29,17 +29,17 @@ object TP2Ex2:
   def elem(x: Int, s: IntSet): Boolean = s(x)
 
   /* Définir les ensembles vide et singleton, ainsi que les opérations ensemblistes suivantes. */
-  def emptySet: IntSet = ???
+  def emptySet: IntSet = (num : Int) => false;
 
-  def singleton(n: Int): IntSet = ???
+  def singleton(n: Int): IntSet = (num : Int ) => n == num
 
-  def union(s1: IntSet, s2: IntSet): IntSet = ???
+  def union(s1: IntSet, s2: IntSet): IntSet = (num : Int) => s1(num) || s2(num)
 
-  def intersection(s1: IntSet, s2: IntSet): IntSet = ???
+  def intersection(s1: IntSet, s2: IntSet): IntSet = (num : Int) => s1(num) && s2(num)
 
-  def complement(s: IntSet): IntSet = ???
+  def complement(s: IntSet): IntSet = (num : Int) =>  !s(num)
 
-  def difference(s1: IntSet, s2: IntSet): IntSet = ???
+  def difference(s1: IntSet, s2: IntSet): IntSet = (num : Int) => s1(num) && !s2(num)
 
   /* Pourquoi est-il impossible de définir une fonction qui indique si deux ensembles IntSet sont égaux? Quelles autres
    * opérations ensemblistes ne peut-on pas définir pour IntSet? */
@@ -49,12 +49,12 @@ object TP2Ex3:
 
   /* Sur le même principe, définissez le type des ensembles de pairs ordonnées d'entiers en remplacant le mot-clé
    * 'Nothing' par une définition appropriée. */
-  type PairOfIntSet = Nothing
+  type PairOfIntSet = (Int, Int) => Boolean
 
-  def elem(n: Int, m: Int, s: PairOfIntSet): Boolean = ???
+  def elem(n: Int, m: Int, s: PairOfIntSet): Boolean = s(n, m)
 
   /* Définissez le produit cartésien de deux IntSet */
-  def cartesianProduct(s1: TP2Ex2.IntSet, s2: TP2Ex2.IntSet): PairOfIntSet = ???
+  def cartesianProduct(s1: TP2Ex2.IntSet, s2: TP2Ex2.IntSet): PairOfIntSet = (n1 : Int, n2 : Int) => (s1(n1) && s2(n2)) || (s1(n2) && s2(n1))
 
 
 object TP2Ex4:
