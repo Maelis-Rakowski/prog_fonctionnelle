@@ -28,6 +28,7 @@ class TestsTP3 extends AnyFlatSpec {
     val e1 = ArithExpr.Constant(v1)
     val v2 = 3.45
     val e2 = ArithExpr.Constant(v2)
+
     eval(e1) shouldBe v1
     eval(e2) shouldBe v2
     eval(ArithExpr.Neg(e1)) shouldBe -v1
@@ -35,7 +36,9 @@ class TestsTP3 extends AnyFlatSpec {
     eval(ArithExpr.Sub(e1, e2)) shouldBe v1 - v2
     eval(ArithExpr.Mult(e1, e2)) shouldBe v1 * v2
     eval(ArithExpr.Add(e2, ArithExpr.Mult(e1, ArithExpr.Sub(e2, e1)))) shouldBe v2 + (v1 * (v2 - v1))
+
   }
+
   
   "Length" should "be defined" in {
     length(List()) shouldBe 0

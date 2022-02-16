@@ -1,5 +1,7 @@
+import com.sun.tools.attach.VirtualMachine
 import jdk.management.jfr.RecordingInfo
 
+import javax.management.Query.eq
 import scala.collection.immutable.List
 
 object TP3Ex1:
@@ -10,23 +12,52 @@ object TP3Ex1:
    * sanguins. */
 
   /* Remplacez cette déclaration de type par une définition utilisant 'enum'*/
-  type BloodGroup = Nothing
+  enum Type :
+    case A
+    case B
+    case AB
+    case O
+
+  enum Rhesus :
+    case p
+    case n
+
+  enum BloodGroup :
+    case Type
+    case Rhesus
+    case P(t : Type, r : Rhesus)
 
   /* Complétez la fonction suivante */
   def valueOf(s: String): BloodGroup = s match
-    case "A+" => ???
-    case "B+" => ???
-    case "AB+" => ???
-    case "O+" => ???
-    case "A-" => ???
-    case "B-" => ???
-    case "AB-" => ???
-    case "O-" => ???
+    case "A+" => BloodGroup.P(Type.A, Rhesus.p)
+    case "B+" => BloodGroup.P(Type.B, Rhesus.p)
+    case "AB+" => BloodGroup.P(Type.AB, Rhesus.p)
+    case "O+" => BloodGroup.P(Type.O, Rhesus.p)
+    case "A-" => BloodGroup.P(Type.A, Rhesus.n)
+    case "B-" => BloodGroup.P(Type.B, Rhesus.n)
+    case "AB-" => BloodGroup.P(Type.AB, Rhesus.n)
+    case "O-" => BloodGroup.P(Type.O, Rhesus.n)
     case _ => throw new IllegalArgumentException
+
+  def compatibleType(donor: BloodGroup, recipient: BloodGroup): Boolean = (donor, recipient) match
+    case (BloodGroup.P(Type.O, _), _) => true
+    case (_, BloodGroup.P(Type.AB, _)) => true
+    case (BloodGroup.P(Type.A, _), BloodGroup.P(Type.A, _)) => true
+    case (BloodGroup.P(Type.B, _), BloodGroup.P(Type.B, _)) => true
+    case (_, _) => false
+
+  def compatibleRhesus(donor : BloodGroup, recipient : BloodGroup): Boolean = (donor, recipient) match {
+    case (BloodGroup.P(_,Rhesus.n), _) => true
+    case (BloodGroup.P(_,Rhesus.p), BloodGroup.P(_,Rhesus.p)) => true
+    case (_, _) => false
+  }
 
   /* Définissez une fonction qui retourne 'true' si et seulement si la transfusion de sang de type 'donor' est possible
    * pour un receveur de type 'recipient' (cf. https://fr.wikipedia.org/wiki/Groupe_sanguin#Compatibilit%C3%A9) */
-  def compatible(donor: BloodGroup, recipient: BloodGroup): Boolean = ???
+  def compatible(donor: BloodGroup, recipient: BloodGroup): Boolean = compatibleType(donor, recipient) && compatibleRhesus(donor, recipient)
+
+
+
 
 
 object TP3Ex2:
@@ -40,7 +71,13 @@ object TP3Ex2:
     case Mult(e1: ArithExpr, e2: ArithExpr)
 
   /* Définissez une fonction pour évaluer une expression arithmétique. */
-  def eval(e: ArithExpr): Double = ???
+  def eval(e: ArithExpr): Double = e match {
+    case ArithExpr.Constant(d) => d
+    case ArithExpr.Neg(e1) => -eval(e1)
+    case ArithExpr.Add(e1, e2) => eval(e1) + eval(e2)
+    case ArithExpr.Sub(e1, e2) => eval(e1) - eval(e2)
+    case ArithExpr.Mult(e1, e2) => eval(e1) * eval(e2)
+  }
 
 
 object TP3Ex3:
@@ -51,47 +88,86 @@ object TP3Ex3:
    * - x :: xs (avec x: A et xs: List[A]) */
 
   /* Retourne la longueur de la liste */
-  def length(l: List[Any]): Int = ???
+  def length(l: List[Any]): Int = l match
+    case Nil => 0
+    case x :: xs => 1 + length(xs)
 
   /* Retourne 'true ' si et seulement si x est contenu dans l */
-  def elem[A](x: A, l: List[A]): Boolean = ???
+  def elem[A](x: A, l: List[A]): Boolean = (x,l) match
+    case (x, Nil) => false
+    case (x, xl :: xls) => x == xl || elem(x, xls)
+
 
   /* Retourne la liste l privée de la première occurrence de l'élément a (si l'élément n'est pas présent, retourne une
    * une liste identique à l) */
-  def remove[A](a: A, l: List[A]): List[A] = ???
+  def remove[A](a: A, l: List[A]): List[A] = (a, l) match
+    case (a, Nil) => l
+    case (a, x :: xs) => if a == x then xs else x :: remove(a, xs)
+
 
   /* Retourne la concaténation de l1 et l2 */
-  def append[A](l1: List[A], l2: List[A]): List[A] = ???
+  def append[A](l1: List[A], l2: List[A]): List[A] = (l1, l2) match
+    case (Nil, l2) => l2
+    case (x :: xs, l2) => x :: append(xs, l2)
 
   /* Créé une liste contenant exactement n fois l'élément x */
   def replicate[A](x: A, n: Int): List[A] =
     if n < 0 then
       throw new IllegalArgumentException("negative integer")
     else
-      ???
+      if n == 0 then Nil
+      else x :: replicate(x, n-1)
 
   /* Retourne 'true' si et seulement si la liste ne contient pas deux fois le même élément */
-  def unique(l: List[Any]): Boolean = ???
+  def unique(l: List[Any]): Boolean = l match
+    case Nil => true
+    case x :: xs => !elem(x, xs) && unique(xs)
+
 
   /* Retourne 'true' si et seulement si l1 est une permutation de l2 (c'est-à-dire contient les mêmes éléments, pas
      nécessairement dans le même ordre) */
-  def permutation(l1: List[Any], l2: List[Any]): Boolean = ???
+  def permutation(l1: List[Any], l2: List[Any]): Boolean = (l1, l2) match
+    case (Nil, Nil) => true
+    case (Nil, l) => false
+    case (l, Nil) => false
+    case (x :: xs, l) => elem(x, l) && permutation(xs, remove(x, l))
+
+
 
   /* Retourne les n premiers éléments de la liste l */
-  def take[A](n: Int, l: List[A]): List[A] = ???
+  def take[A](n: Int, l: List[A]): List[A] = (n, l) match
+    case (0, _) => Nil
+    case (_, Nil) => Nil
+    case (n, x :: xs) => x :: take(n-1, xs)
 
   /* Retourne les (length(l) - n) derniers éléments de la liste l */
-  def drop[A](n: Int, l: List[A]): List[A] = ???
+  def drop[A](n: Int, l: List[A]): List[A] = (n, l) match
+    case (_, Nil) => Nil
+    case (0, l) => l
+    case (n, x :: xs) => drop(n-1, xs)
 
   /* Retourne la liste l en sens inverse. */
-  def reverse[A](l: List[A]): List[A] = ???
+  def reverse[A](l: List[A]): List[A] = l match
+    case Nil => Nil
+    case x :: Nil => x :: Nil
+    case (x :: xs) => append(reverse(xs) , x :: Nil)
 
   /* Joint deux listes pour former une liste de pairs. La liste retournée sera seulement aussi longue que la plus courte
    * des deux listes passées en argument). */
-  def zip[A,B](l1: List[A], l2: List[B]): List[(A,B)] = ???
+  def zip[A,B](l1: List[A], l2: List[B]): List[(A,B)] = (l1, l2) match
+    case (_, Nil)=> Nil
+    case (Nil, _) => Nil
+    case (l1 :: l1s, l2 :: l2s) => (l1,l2) :: zip(l1s, l2s)
 
   /* Trie une liste d'entiers. */
-  def sort(l: List[Int]): List[Int] = ???
+  def insertElem(x: Int, l: List[Int]) : List[Int] = l match
+      case Nil => x :: Nil
+      case head :: tail => if head >= x then x :: l else head :: insertElem(x, tail)
+
+  def sort(l: List[Int]): List[Int] = l match
+    case Nil => Nil
+    case l :: ls => insertElem(l, sort(ls))
+
 
   /* Prend une liste, dont certains éléments peuvent des listes (elles-même pouvant contenir des listes et ainsi de
    * suite) et qui retourne une version "applatie" de cette liste, c'est-à-dire qui contient les mêmes éléments mais
