@@ -92,7 +92,10 @@ object TP5Ex4:
 
   /* Définissez une fonction de complexité linéaire pour calculer le même résultat. */
   def optimizedFibonacci(n: Int): Int =
-    ???
+    def aux(n: Int, acc:Int, w: Int): Int = n match
+      case 0 => acc
+      case _ => aux(n-1,w,w+acc)
+    aux(n,0,1)
 
 
   @main def mainTP5Ex4 =

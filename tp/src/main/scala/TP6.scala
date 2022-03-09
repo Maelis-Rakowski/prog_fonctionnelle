@@ -6,7 +6,7 @@ object TP6Ex1:
   /* une fonction simple avec un effet de bord (println) pour observer l'évaluation */
   def double(n: Int): Int =
     println(s"evaluating double(${n})")
-    n + n
+    n+n
 
   /* Quelle sera la sortie sur la console si on évalue eagerExample(double(1), double(3))?
    * même question avec lazyExample(double(1), double(3))?
@@ -35,9 +35,11 @@ object TP6Ex2:
   /* Définissez les fonctions booléennes suivantes, qui se comportent comme les opérateurs "court-circuits" && et ||
      (c'est-à-dire que le deuxième argument de l'opérateur ne doit pas être évalué si sa valeur n'est pas nécessaire).
      La définition n'utilisera pas les opérateurs && et || */
-  def lazyAnd(l: Boolean, r: Boolean): Boolean = ???
+  def lazyAnd(l: => Boolean, r: => Boolean): Boolean =
+    if l then r else false
 
-  def lazyOr(l: Boolean, r: Boolean) = ???
+  def lazyOr(l: => Boolean, r: => Boolean) =
+    if l then true else r
 
 object TP6Ex3:
 
@@ -67,23 +69,38 @@ object TP6Ex4:
   /* Définissez les fonctions suivantes sur les streams */
 
   /* Renvoie vrai si et seulement si l'élément v est contenu dans le stream s */
-  def findValue[A](a: A, s: LazyList[A]): Boolean = ???
+  def findValue[A](a: A, s: LazyList[A]): Boolean =
+    if s == LazyList.empty then
+      false
+    else
+      s.head == a || findValue(a, s.tail)
 
   /* Étant donné un stream s = [x0, x1, x2...], differenceStream renvoie le stream [x1-x0, x2-x1, , x3-x2...] */
-  def differenceStream(s: LazyList[Double]): LazyList[Double] = ???
+  def differenceStream(s: LazyList[Double]): LazyList[Double] =
+    if s == LazyList.empty || s.tail == LazyList.empty then
+      LazyList.empty
+    else
+      (s.tail.head - s.head) #:: differenceStream(s.tail)
 
   /* Étant donné un stream s = [x0, x1, x2...], mapStream(f) renvoie le stream [f(x0), f(x1), , f(x2)...] */
-  def mapStream[A,B](s: LazyList[A], f: A => B): LazyList[B] = ???
+  def mapStream[A,B](s: LazyList[A], f: A => B): LazyList[B] =
+    if s == LazyList.empty || s.tail == LazyList.empty then
+      LazyList.empty
+    else
+      f(s.head) #:: mapStream(s.tail, f)
 
 object TP6Ex5:
 
   /* Définissez les streams d'entiers suivants: */
 
   /* La séquence contenant tous les entiers pairs */
-  def evenNumbers: LazyList[Int] = ???
+  def from(n : Int): LazyList[Int] = n #:: from(n+2)
+
+  def evenNumbers: LazyList[Int] = from(0)
 
   /* La séquence de Fibonacci */
-  def fibonacciSequence: LazyList[Int] = ???
+  def from2(n : Int): LazyList[Int] = if n == 0 || n == 1 then n #:: from(n)  else n #:: from(from(n-1) + from(n -2))
+  def fibonacciSequence: LazyList[Int] = from2(0)
 
   /* La séquence contenant tous les entiers premiers */
   def primes: LazyList[Int] = ???
