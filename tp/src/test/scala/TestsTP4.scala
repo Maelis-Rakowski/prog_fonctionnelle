@@ -9,8 +9,11 @@ class TestsTP4 extends AnyFlatSpec {
   "ListQueue" should "be defined" in {
     val q1 = new ListQueue[Int]().enqueue(1).enqueue(2).enqueue(3)
     q1.peek() shouldBe 1
+    q1.isEmpty() shouldBe false
     val q2 = q1.dequeue().dequeue()
     q2.peek() shouldBe 3
+    val q3 = new ListQueue[Int]()
+    q3.isEmpty() shouldBe true
   }
 
   "DoubleListQueue" should "be defined" in {
@@ -57,8 +60,10 @@ class TestsTP4 extends AnyFlatSpec {
   "Fraction" should "redefine equality and hashCode" in {
     val fr1 = new Fraction(3, 8)
     val fr2 = new Fraction(9, 24)
+    val fr3 = new Fraction(1, 3)
     fr1 shouldBe fr2
     fr1.hashCode() shouldBe fr2.hashCode()
+    fr1 == fr3 shouldBe false
   }
 
   "Fraction operations" should "be defined" in {
